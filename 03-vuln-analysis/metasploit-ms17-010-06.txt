@@ -1,0 +1,34 @@
+[0m
+Matching Modules
+================
+
+   #   Full Name                                      Disclosure Date  Rank     Check  Name
+   -   ---------                                      ---------------  ----     -----  ----
+   0   exploit/windows/smb/ms17_010_eternalblue       2017-03-14       average  Yes    [45mMS17-010[0m EternalBlue SMB Remote Windows Kernel Pool Corruption
+   1     \_ target: Automatic Target                  .                .        .      .
+   2     \_ target: Windows 7                         .                .        .      .
+   3     \_ target: Windows Embedded Standard 7       .                .        .      .
+   4     \_ target: Windows Server 2008 R2            .                .        .      .
+   5     \_ target: Windows 8                         .                .        .      .
+   6     \_ target: Windows 8.1                       .                .        .      .
+   7     \_ target: Windows Server 2012               .                .        .      .
+   8     \_ target: Windows 10 Pro                    .                .        .      .
+   9     \_ target: Windows 10 Enterprise Evaluation  .                .        .      .
+   10  exploit/windows/smb/ms17_010_psexec            2017-03-14       normal   Yes    [45mMS17-010[0m EternalRomance/EternalSynergy/EternalChampion SMB Remote Windows Code Execution
+   11    \_ target: Automatic                         .                .        .      .
+   12    \_ target: PowerShell                        .                .        .      .
+   13    \_ target: Native upload                     .                .        .      .
+   14    \_ target: MOF upload                        .                .        .      .
+   15    \_ AKA: ETERNALSYNERGY                       .                .        .      .
+   16    \_ AKA: ETERNALROMANCE                       .                .        .      .
+   17    \_ AKA: ETERNALCHAMPION                      .                .        .      .
+   18    \_ AKA: ETERNALBLUE                          .                .        .      .
+   19  exploit/windows/smb/smb_doublepulsar_rce       2017-04-14       [32mgreat[0m    Yes    SMB DOUBLEPULSAR Remote Code Execution
+   20    \_ target: Execute payload (x64)             .                .        .      .
+   21    \_ target: Neutralize implant                .                .        .      .
+
+
+Interact with a module by name or index. For example [32minfo 21[0m, [32muse 21[0m or [32muse exploit/windows/smb/smb_doublepulsar_rce[0m
+After interacting with a module you can manually set a TARGET with [32mset TARGET 'Neutralize implant'[0m
+
+[0m

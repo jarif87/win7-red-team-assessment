@@ -1,0 +1,11 @@
+----------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------
+ Exploit Title                                                                                                                                             |  Path
+----------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------
+Microsoft Windows - 'EternalRomance'/'EternalSynergy'/'EternalChampion' SMB Remote Code Execution (Metasploit) ([01;31m[KMS17-010[m[K)                                  | windows/remote/43970.rb
+Microsoft Windows - SMB Remote Code Execution Scanner ([01;31m[KMS17-010[m[K) (Metasploit)                                                                              | windows/dos/41891.rb
+Microsoft Windows 7/2008 R2 - 'EternalBlue' SMB Remote Code Execution ([01;31m[KMS17-010[m[K)                                                                           | windows/remote/42031.py
+Microsoft Windows 7/8.1/2008 R2/2012 R2/2016 R2 - 'EternalBlue' SMB Remote Code Execution ([01;31m[KMS17-010[m[K)                                                       | windows/remote/42315.py
+Microsoft Windows 8/8.1/2012 R2 (x64) - 'EternalBlue' SMB Remote Code Execution ([01;31m[KMS17-010[m[K)                                                                 | windows_x86-64/remote/42030.py
+Microsoft Windows Server 2008 R2 (x64) - 'SrvOs2FeaToNt' SMB Remote Code Execution ([01;31m[KMS17-010[m[K)                                                              | windows_x86-64/remote/41987.py
+----------------------------------------------------------------------------------------------------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results

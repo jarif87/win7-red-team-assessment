@@ -1,0 +1,88 @@
+[i] Updating via apt package management (Expect weekly-ish updates): exploitdb
+
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Err:1 http://http.kali.org/kali kali-rolling InRelease
+  Temporary failure resolving 'http.kali.org'
+Reading package lists...
+Building dependency tree...
+Reading state information...
+All packages are up to date.
+Warning: Failed to fetch http://http.kali.org/kali/dists/kali-rolling/InRelease  Temporary failure resolving 'http.kali.org'
+Warning: Some index files failed to download. They have been ignored, or old ones used instead.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+exploitdb is already the newest version (20260904-0kali1).
+Solving dependencies...
+The following packages were automatically installed and are no longer required:
+  bluez-hcidump              libigdgmm12         libpython3.13-minimal
+  firmware-marvell-prestera  libimath-3-1-29t64  libpython3.13-stdlib
+  iucode-tool                libjim0.83          libvidstab1.1
+  libabsl20260107            libkmlbase1t64      libx265-215
+  libbluray3                 libkmldom1t64       perl-modules-5.40
+  libconfig++11              libkmlengine1t64    python3-mitmproxy-wireguard
+  libconfig11                libntfs-3g89t64     python3.13
+  libgeos3.14.1              libopenjph0.27      python3.13-dev
+  libhdf5-310                libperl5.40         python3.13-minimal
+  libhdf5-hl-310             libpoppler156       python3.13-tk
+  libigc2                    libpython3.13       python3.13-venv
+  libigdfcl2                 libpython3.13-dev   rpcsvc-proto
+Use 'sudo apt autoremove' to remove them.
+
+Summary:
+  Upgrading: 0, Installing: 0, Removing: 0, Not Upgrading: 0
+
+[*] apt update finished
+[i] Updating via apt package management (Expect weekly-ish updates): exploitdb-papers
+
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Ign:1 http://http.kali.org/kali kali-rolling InRelease
+Err:1 http://http.kali.org/kali kali-rolling InRelease
+  Temporary failure resolving 'http.kali.org'
+Reading package lists...
+Building dependency tree...
+Reading state information...
+All packages are up to date.
+Warning: Failed to fetch http://http.kali.org/kali/dists/kali-rolling/InRelease  Temporary failure resolving 'http.kali.org'
+Warning: Some index files failed to download. They have been ignored, or old ones used instead.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+Solving dependencies...
+The following packages were automatically installed and are no longer required:
+  bluez-hcidump              libigdgmm12         libpython3.13-minimal
+  firmware-marvell-prestera  libimath-3-1-29t64  libpython3.13-stdlib
+  iucode-tool                libjim0.83          libvidstab1.1
+  libabsl20260107            libkmlbase1t64      libx265-215
+  libbluray3                 libkmldom1t64       perl-modules-5.40
+  libconfig++11              libkmlengine1t64    python3-mitmproxy-wireguard
+  libconfig11                libntfs-3g89t64     python3.13
+  libgeos3.14.1              libopenjph0.27      python3.13-dev
+  libhdf5-310                libperl5.40         python3.13-minimal
+  libhdf5-hl-310             libpoppler156       python3.13-tk
+  libigc2                    libpython3.13       python3.13-venv
+  libigdfcl2                 libpython3.13-dev   rpcsvc-proto
+Use 'sudo apt autoremove' to remove them.
+
+Installing:
+  exploitdb-papers
+
+Summary:
+  Upgrading: 0, Installing: 1, Removing: 0, Not Upgrading: 0
+  Download size: 2561 MB
+  Space needed: 2952 MB / 42.3 GB available
+
+Ign:1 http://http.kali.org/kali kali-rolling/main amd64 exploitdb-papers all 20221122-0kali1
+Ign:1 http://http.kali.org/kali kali-rolling/main amd64 exploitdb-papers all 20221122-0kali1
+Ign:1 http://http.kali.org/kali kali-rolling/main amd64 exploitdb-papers all 20221122-0kali1
+Err:1 http://http.kali.org/kali kali-rolling/main amd64 exploitdb-papers all 20221122-0kali1
+  Temporary failure resolving 'http.kali.org'
+Error: Failed to fetch http://http.kali.org/kali/pool/main/e/exploitdb-papers/exploitdb-papers_20221122-0kali1_all.deb  Temporary failure resolving 'http.kali.org'
+Error: Unable to fetch some archives, maybe run apt update or try with --fix-missing?
+
+[-] Issue with apt upgrade
+
+[*] apt update finished
