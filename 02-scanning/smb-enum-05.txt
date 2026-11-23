@@ -1,0 +1,23 @@
+# Nmap 7.99 scan initiated Mon Nov 23 08:07:20 2026 as: /usr/lib/nmap/nmap -p445 --script smb-enum-shares,smb-enum-users -oN smb-enum-05.txt 192.168.56.103
+Nmap scan report for 192.168.56.103
+Host is up (0.0017s latency).
+
+PORT    STATE SERVICE
+445/tcp open  microsoft-ds
+MAC Address: 08:00:27:51:1A:A4 (Oracle VirtualBox virtual NIC)
+
+Host script results:
+| smb-enum-shares: 
+|   note: ERROR: Enumerating shares failed, guessing at common ones (NT_STATUS_ACCESS_DENIED)
+|   account_used: <blank>
+|   \\192.168.56.103\ADMIN$: 
+|     warning: Couldn't get details for share: NT_STATUS_ACCESS_DENIED
+|     Anonymous access: <none>
+|   \\192.168.56.103\C$: 
+|     warning: Couldn't get details for share: NT_STATUS_ACCESS_DENIED
+|     Anonymous access: <none>
+|   \\192.168.56.103\IPC$: 
+|     warning: Couldn't get details for share: NT_STATUS_ACCESS_DENIED
+|_    Anonymous access: READ
+
+# Nmap done at Mon Nov 23 08:07:25 2026 -- 1 IP address (1 host up) scanned in 5.16 seconds

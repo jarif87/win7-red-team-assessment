@@ -1,0 +1,23 @@
+# Nmap 7.99 scan initiated Mon Nov 23 07:53:55 2026 as: /usr/lib/nmap/nmap -O -oN os-detection-03.txt 192.168.56.103
+Nmap scan report for 192.168.56.103
+Host is up (0.0017s latency).
+Not shown: 991 closed tcp ports (reset)
+PORT      STATE SERVICE
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+445/tcp   open  microsoft-ds
+49152/tcp open  unknown
+49153/tcp open  unknown
+49154/tcp open  unknown
+49155/tcp open  unknown
+49156/tcp open  unknown
+49157/tcp open  unknown
+MAC Address: 08:00:27:51:1A:A4 (Oracle VirtualBox virtual NIC)
+Device type: general purpose
+Running: Microsoft Windows 2008|7|Vista|8.1
+OS CPE: cpe:/o:microsoft:windows_server_2008:r2 cpe:/o:microsoft:windows_7 cpe:/o:microsoft:windows_vista cpe:/o:microsoft:windows_8.1
+OS details: Microsoft Windows Vista SP2 or Windows 7 or Windows Server 2008 R2 or Windows 8.1
+Network Distance: 1 hop
+
+OS detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Mon Nov 23 07:53:58 2026 -- 1 IP address (1 host up) scanned in 3.32 seconds
